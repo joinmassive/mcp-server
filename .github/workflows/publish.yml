@@ -1,0 +1,61 @@
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+      - name: Verify version match
+        run: |
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+          TAG="${GITHUB_REF#refs/tags/v}"
+          if [ "$PKG_VERSION" != "$TAG" ] || [ "$MANIFEST_VERSION" != "$TAG" ]; then
+            echo "Version mismatch: tag=$TAG package=$PKG_VERSION manifest=$MANIFEST_VERSION" >&2
+            exit 1
+          fi
+
+      # Build & verify MCPB BEFORE publishing to npm so a broken bundle can't ship.
+      - name: Build MCPB bundle
+        run: npm run build:mcpb
+
+      - name: Verify MCPB asset exists
+        run: |
+          shopt -s nullglob
+          ASSETS=(dist-mcpb/*.mcpb)
+          if [ ${#ASSETS[@]} -eq 0 ]; then
+            echo "No .mcpb asset produced under dist-mcpb/" >&2
+            exit 1
+          fi
+
+      - name: Publish to npm with provenance
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub Release with MCPB asset
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
+          files: dist-mcpb/*.mcpb

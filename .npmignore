@@ -1,0 +1,12 @@
+src/
+tests/
+scripts/
+.github/
+manifest.json
+tsup.config.ts
+tsconfig.json
+vitest.config.ts
+eslint.config.js
+*.mcpb
+.gitignore
+.npmignore

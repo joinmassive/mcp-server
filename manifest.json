@@ -1,0 +1,56 @@
+{
+  "manifest_version": "0.2",
+  "name": "massive-mcp",
+  "display_name": "Massive Web Render",
+  "version": "0.1.0",
+  "description": "Real-time web access for AI agents — fetch any URL, search Google, query AI chatbots — with JS rendering, captcha solving, and 195+ country geo-targeting.",
+  "long_description": "Official MCP server for the Massive Web Render API. Four tools: web_fetch (any URL → Markdown/HTML), web_search (parsed Google SERP), ai_chat_completion (ChatGPT/Gemini/Perplexity/Copilot with sources), account_status (credits remaining). Pay-as-you-go pricing — see https://joinmassive.com/pricing. Compatible with Claude Desktop, Cursor, Continue, Cody, Windsurf, and any MCP-compatible client.",
+  "author": { "name": "Massive Computing, Inc.", "url": "https://joinmassive.com" },
+  "homepage": "https://github.com/joinmassive/mcp-server",
+  "documentation": "https://github.com/joinmassive/mcp-server#readme",
+  "support": "https://github.com/joinmassive/mcp-server/issues",
+  "license": "MIT",
+  "icon": "icon.png",
+  "keywords": ["web", "scraping", "search", "ai", "render"],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": { "MASSIVE_TOKEN": "${user_config.massive_token}" }
+    }
+  },
+  "user_config": {
+    "massive_token": {
+      "type": "string",
+      "title": "Massive API token",
+      "description": "Get your token at https://dashboard.joinmassive.com/developer/api-keys",
+      "sensitive": true,
+      "required": true
+    }
+  },
+  "tools": [
+    {
+      "name": "web_fetch",
+      "description": "Fetch any URL through Massive — returns rendered HTML, raw HTML, or Markdown."
+    },
+    {
+      "name": "web_search",
+      "description": "Google search results parsed into structured JSON."
+    },
+    {
+      "name": "ai_chat_completion",
+      "description": "Get a chatbot answer with structured sources."
+    },
+    {
+      "name": "account_status",
+      "description": "User's remaining credit balance."
+    }
+  ],
+  "compatibility": {
+    "claude_desktop": "*",
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": { "node": ">=20.0.0" }
+  }
+}

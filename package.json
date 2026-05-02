@@ -1,0 +1,68 @@
+{
+  "name": "@joinmassive/mcp-server",
+  "version": "0.1.0",
+  "description": "Official MCP server for the Massive Web Render API. Real-time web access for AI agents — fetch any URL, search Google, query AI chatbots — with JS rendering, captcha solving, and 195+ country geo-targeting.",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "massive-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --target node20",
+    "dev": "tsup src/index.ts --format esm --watch --target node20",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:live": "tsx tests/test-live.ts",
+    "lint": "eslint src tests",
+    "typecheck": "tsc --noEmit",
+    "build:mcpb": "node scripts/build-mcpb.mjs",
+    "prepublishOnly": "npm run lint && npm run typecheck && npm test && npm run build"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "web-scraping",
+    "claude",
+    "anthropic",
+    "ai-agent"
+  ],
+  "homepage": "https://github.com/joinmassive/mcp-server#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joinmassive/mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/joinmassive/mcp-server/issues"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "cheerio": "^1.2.0",
+    "zod": "^4.4.1"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^25.6.0",
+    "@vitest/coverage-v8": "^4.1.5",
+    "archiver": "^7.0.1",
+    "eslint": "^10.2.1",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.1",
+    "vitest": "^4.1.5"
+  }
+}
