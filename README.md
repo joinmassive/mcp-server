@@ -28,6 +28,16 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 
 Restart Claude Desktop.
 
+## Quickstart (Claude Code)
+
+One command, works across all your projects:
+
+```sh
+claude mcp add massive --scope user -e MASSIVE_TOKEN=your-token-here -- npx -y @joinmassive/mcp-server
+```
+
+Then `/mcp` in any Claude Code session to confirm it's connected. Drop `--scope user` to scope it to the current project only.
+
 ### Other MCP clients
 
 The same JSON snippet works for any MCP-compatible client. Drop it into the client's config file:
