@@ -36,6 +36,12 @@ export const aiChatInput = {
     .max(64)
     .optional()
     .describe("UI display language. Same format as `language`."),
+  device: z
+    .string()
+    .min(1)
+    .max(64)
+    .optional()
+    .describe("Device emulation name (e.g. 'iphone-15')."),
 };
 
 const InputSchema = z.object(aiChatInput);
@@ -62,6 +68,7 @@ export async function aiChatHandler(input: Input, client: MassiveClient): Promis
       expiration: parsed.expiration,
       language: parsed.language,
       display: parsed.display,
+      device: parsed.device,
     });
 
     const out = {

@@ -163,4 +163,34 @@ describe("aiChatHandler", () => {
     expect(reqUrl).not.toMatch(/language=/);
     expect(reqUrl).not.toMatch(/display=/);
   });
+
+  it("forwards device when provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ completion: "<p>x</p>", sources: "", model: "chatgpt" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await aiChatHandler({ prompt: "hi", device: "iphone-15" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/device=iphone-15/);
+  });
+
+  it("omits device when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ completion: "<p>x</p>", sources: "", model: "chatgpt" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await aiChatHandler({ prompt: "hi" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/device=/);
+  });
 });
