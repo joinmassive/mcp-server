@@ -14,6 +14,13 @@ export const webSearchInput = {
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code"),
   city: z.string().optional().describe("City name for geo-targeting"),
   max_results: z.number().int().min(1).max(50).default(10).describe("Max organic results to return (default 10)"),
+  expiration: z
+    .number()
+    .int("expiration must be an integer (days)")
+    .min(0, "expiration must be 0–365 days")
+    .max(365, "expiration must be 0–365 days")
+    .optional()
+    .describe("Days the cached result is reused (0 = always live; default 1)."),
 };
 
 const InputSchema = z.object(webSearchInput);
@@ -30,6 +37,7 @@ export async function webSearchHandler(input: Input, client: MassiveClient): Pro
       country: parsed.country,
       city: parsed.city,
       awaiting: ["ai", "answers"],
+      expiration: parsed.expiration,
     });
 
     const serp = parseSerp(html, { query: parsed.query, maxResults: parsed.max_results });

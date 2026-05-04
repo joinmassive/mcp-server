@@ -78,4 +78,51 @@ describe("webSearchHandler", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toMatch(/403/);
   });
+
+  it("forwards expiration when provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(fixture, { status: 200, headers: { "content-type": "text/html" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webSearchHandler({ query: "x", max_results: 10, expiration: 7 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/expiration=7/);
+  });
+
+  it("forwards expiration=0 (live, no cache)", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(fixture, { status: 200, headers: { "content-type": "text/html" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webSearchHandler({ query: "x", max_results: 10, expiration: 0 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/expiration=0/);
+  });
+
+  it("omits expiration when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(fixture, { status: 200, headers: { "content-type": "text/html" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webSearchHandler({ query: "x", max_results: 10 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/expiration=/);
+  });
+
+  it("rejects expiration > 365", async () => {
+    const fetchSpy = vi.fn();
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+    const result = await webSearchHandler(
+      { query: "x", max_results: 10, expiration: 999 } as never,
+      client,
+    );
+    expect(result.isError).toBe(true);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });
