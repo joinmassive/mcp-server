@@ -29,7 +29,7 @@ export const aiChatInput = {
     .min(2)
     .max(64)
     .optional()
-    .describe("Conversation language. Accepts language name (e.g. 'spanish') or ISO 639-2 code (e.g. 'spa')."),
+    .describe("Conversation language. Accepts language name (e.g. 'spanish') or ISO 639-1 code (e.g. 'es'). Case-insensitive."),
   display: z
     .string()
     .min(2)

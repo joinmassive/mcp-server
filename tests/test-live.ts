@@ -70,11 +70,11 @@ async function main(): Promise<void> {
   );
 
   results.push(
-    await run("web_search (language=spa)", async () => {
+    await run("web_search (language=es)", async () => {
       const html = await client.get<string>("/search", {
         terms: "noticias",
         awaiting: ["ai", "answers"],
-        language: "spa",
+        language: "es",
       });
       return typeof html === "string" && html.length > 1000;
     }),
