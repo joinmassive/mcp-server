@@ -3,8 +3,8 @@
   "name": "massive-mcp",
   "display_name": "Massive Web Render",
   "version": "0.1.0",
-  "description": "Real-time web access for AI agents — fetch any URL, search Google, query AI chatbots — with JS rendering, captcha solving, and 195+ country geo-targeting.",
-  "long_description": "Official MCP server for the Massive Web Render API. Four tools: web_fetch (any URL → Markdown/HTML), web_search (parsed Google SERP), ai_chat_completion (ChatGPT/Gemini/Perplexity/Copilot with sources), account_status (credits remaining). Pay-as-you-go pricing — see https://joinmassive.com/pricing. Compatible with Claude Desktop, Cursor, Continue, Cody, Windsurf, and any MCP-compatible client.",
+  "description": "Real-time web access for AI agents — fetch URLs, search Google, query AI chatbots.",
+  "long_description": "Official MCP server for the Massive Web Render API.\n\nFour tools: web_fetch (any URL → Markdown/HTML, with JS rendering, captchas, and geo-targeting), web_search (parsed Google SERP with AI overview + people-also-asked), ai_chat_completion (ChatGPT/Gemini/Perplexity/Copilot answers with structured sources), account_status (credits remaining).\n\nThree reference resources surface inside MCP clients (Connectors panel / @-menu): docs://massive/pricing, docs://massive/geotargeting, docs://massive/changelog. Four starter prompts ship out of the box.\n\nPay-as-you-go pricing — see https://joinmassive.com/pricing. MIT-licensed; source at https://github.com/joinmassive/mcp-server. Compatible with Claude Desktop, Claude Code, Cursor, Continue, Cody, Windsurf, and any MCP-compatible client.",
   "author": { "name": "Massive Computing, Inc.", "url": "https://joinmassive.com" },
   "homepage": "https://github.com/joinmassive/mcp-server",
   "documentation": "https://github.com/joinmassive/mcp-server#readme",
@@ -33,19 +33,19 @@
   "tools": [
     {
       "name": "web_fetch",
-      "description": "Fetch any URL through Massive — returns rendered HTML, raw HTML, or Markdown."
+      "description": "Fetch any URL through Massive — returns rendered HTML, raw HTML, or Markdown. Supports geo-targeting (country/city), device emulation, cache control (expiration), and anti-bot difficulty levels."
     },
     {
       "name": "web_search",
-      "description": "Google search results parsed into structured JSON."
+      "description": "Google search results parsed into structured JSON (organic + AI overview + people-also-asked). Supports geo-targeting, language/display, and cache control."
     },
     {
       "name": "ai_chat_completion",
-      "description": "Get a chatbot answer with structured sources."
+      "description": "Get a chatbot answer (ChatGPT/Gemini/Perplexity/Copilot) with structured sources. Supports geo-targeting, language/display, device emulation, and cache control."
     },
     {
       "name": "account_status",
-      "description": "User's remaining credit balance."
+      "description": "User's remaining credit balance (free; does not consume credits)."
     }
   ],
   "prompts": [
