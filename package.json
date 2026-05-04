@@ -18,6 +18,10 @@
     "node": ">=20"
   },
   "scripts": {
+    "resources": "node scripts/bundle-resources.mjs",
+    "prebuild": "npm run resources",
+    "pretest": "npm run resources",
+    "pretypecheck": "npm run resources",
     "build": "tsup src/index.ts --format esm --dts --clean --target node20",
     "dev": "tsup src/index.ts --format esm --watch --target node20",
     "test": "vitest run",
