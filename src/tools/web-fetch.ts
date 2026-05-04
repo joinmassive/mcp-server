@@ -24,6 +24,12 @@ export const webFetchInput = {
     .max(365, "expiration must be 0–365 days")
     .optional()
     .describe("Days the cached result is reused (0 = always live; default 1)."),
+  difficulty: z
+    .enum(["low", "medium", "high"])
+    .default("low")
+    .describe(
+      "Anti-bot evasion strength. Multipliers: low=1×, medium=2×, high=premium (further multiplier). Use higher only if low fails.",
+    ),
 };
 
 const InputSchema = z.object(webFetchInput);
@@ -43,6 +49,7 @@ export async function webFetchHandler(input: Input, client: MassiveClient): Prom
       city: parsed.city,
       device: parsed.device,
       expiration: parsed.expiration,
+      difficulty: parsed.difficulty,
     });
 
     const structured: Record<string, unknown> = {
