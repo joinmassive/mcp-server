@@ -119,6 +119,37 @@ Returns: `{ completion, sources, model, subqueries? }`.
 
 No args. Returns `{ credits_remaining }`. Useful to warn the user before they run out of credits. Free — does not consume credits.
 
+## Pricing & cost control
+
+Credit costs (live reference: <https://joinmassive.com/pricing>):
+
+| Endpoint | Base cost | Notes |
+| --- | --- | --- |
+| `web_fetch` | 1 credit | Multipliers — `difficulty=medium` → 2×, `difficulty=high` → premium |
+| `web_search` | 1 credit | No multipliers |
+| `ai_chat_completion` | 1 credit | No multipliers |
+| `account_status` | Free | — |
+
+**Worked example:** `web_fetch` with `difficulty=medium` costs `1 × 2 = 2 credits`.
+
+### Tips for keeping costs down
+
+- **Cache:** `expiration` (days) reuses recent results. Default `1`. Set `expiration=0` only when freshness matters (prices, scores, weather).
+- **Difficulty:** start with default `low`. Bump to `medium` / `high` only if the low attempt fails.
+- **Check first:** call `account_status` (free) before launching a batch.
+
+## Resources
+
+This server exposes three read-only reference documents at `docs://` URIs. They show up in your MCP client as attachable references:
+
+| URI | Contents |
+| --- | --- |
+| `docs://massive/pricing` | Credit costs and multipliers (same as the table above, inline in your client) |
+| `docs://massive/geotargeting` | 190+ countries, subdivision/city format, examples |
+| `docs://massive/changelog` | What's new in each release |
+
+In Claude Desktop: open the Connectors panel and pick the resource from this server. In Claude Code: type `@` and search by name. **The model does not auto-read these — they're for you to browse.**
+
 ## Troubleshooting
 
 **"MASSIVE_TOKEN env var is not set"**
