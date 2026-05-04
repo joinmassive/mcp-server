@@ -125,4 +125,45 @@ describe("webSearchHandler", () => {
     expect(result.isError).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it("forwards language and display params", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(fixture, { status: 200, headers: { "content-type": "text/html" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webSearchHandler(
+      { query: "noticias", max_results: 10, language: "spanish", display: "spa" },
+      client,
+    );
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/language=spanish/);
+    expect(reqUrl).toMatch(/display=spa/);
+  });
+
+  it("omits language and display when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(fixture, { status: 200, headers: { "content-type": "text/html" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webSearchHandler({ query: "x", max_results: 10 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/language=/);
+    expect(reqUrl).not.toMatch(/display=/);
+  });
+
+  it.each([
+    { field: "language", val: "x" },
+    { field: "display", val: "x" },
+  ])("rejects $field shorter than 2 characters", async ({ field, val }) => {
+    const fetchSpy = vi.fn();
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+    const input = { query: "x", max_results: 10, [field]: val } as never;
+    const result = await webSearchHandler(input, client);
+    expect(result.isError).toBe(true);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
 });
