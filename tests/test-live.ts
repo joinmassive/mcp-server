@@ -58,6 +58,28 @@ async function main(): Promise<void> {
     }),
   );
 
+  results.push(
+    await run("web_fetch (expiration=0, live)", async () => {
+      const body = await client.get<string>("/browser", {
+        url: "https://example.com",
+        format: "markdown",
+        expiration: 0,
+      });
+      return body.toLowerCase().includes("example domain");
+    }),
+  );
+
+  results.push(
+    await run("web_search (language=spa)", async () => {
+      const html = await client.get<string>("/search", {
+        terms: "noticias",
+        awaiting: ["ai", "answers"],
+        language: "spa",
+      });
+      return typeof html === "string" && html.length > 1000;
+    }),
+  );
+
   for (const r of results) {
     console.error(`${r.ok ? "PASS" : "FAIL"}  ${r.name}  ${r.detail}`);
   }
