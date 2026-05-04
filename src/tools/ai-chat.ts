@@ -17,6 +17,13 @@ export const aiChatInput = {
     .describe("Which chatbot to query"),
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code"),
   city: z.string().optional().describe("City name for geo-targeting"),
+  expiration: z
+    .number()
+    .int("expiration must be an integer (days)")
+    .min(0, "expiration must be 0–365 days")
+    .max(365, "expiration must be 0–365 days")
+    .optional()
+    .describe("Days the cached result is reused (0 = always live; default 1)."),
 };
 
 const InputSchema = z.object(aiChatInput);
@@ -40,6 +47,7 @@ export async function aiChatHandler(input: Input, client: MassiveClient): Promis
       country: parsed.country,
       city: parsed.city,
       format: "json",
+      expiration: parsed.expiration,
     });
 
     const out = {

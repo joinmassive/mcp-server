@@ -86,4 +86,49 @@ describe("aiChatHandler", () => {
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toMatch(/403/);
   });
+
+  it("forwards expiration when provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ completion: "<p>x</p>", sources: "", model: "chatgpt" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await aiChatHandler({ prompt: "hi", expiration: 7 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/expiration=7/);
+  });
+
+  it("forwards expiration=0 (live, no cache)", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ completion: "<p>x</p>", sources: "", model: "chatgpt" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await aiChatHandler({ prompt: "hi", expiration: 0 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/expiration=0/);
+  });
+
+  it("omits expiration when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ completion: "<p>x</p>", sources: "", model: "chatgpt" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await aiChatHandler({ prompt: "hi" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/expiration=/);
+  });
 });
