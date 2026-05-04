@@ -26,7 +26,7 @@ export const webSearchInput = {
     .min(2)
     .max(64)
     .optional()
-    .describe("Search language. Accepts language name (e.g. 'spanish') or ISO 639-1 code (e.g. 'es'). Case-insensitive."),
+    .describe("Search language. Common name (e.g. 'spanish'), two-letter ISO code (e.g. 'es'), or Google code. Case-insensitive."),
   display: z
     .string()
     .min(2)
