@@ -48,6 +48,39 @@
       "description": "User's remaining credit balance."
     }
   ],
+  "prompts": [
+    {
+      "name": "web_search_full",
+      "description": "Google search: top 10 organic results, AI overview, and people-also-asked.",
+      "arguments": [
+        { "name": "topic", "description": "What to search for", "required": true }
+      ],
+      "text": "Use web_search to search Google for \"{topic}\". List the top 10 organic results (title, URL, snippet), the AI overview (with sources) if present, and the people-also-asked questions."
+    },
+    {
+      "name": "web_fetch_markdown",
+      "description": "Fetch a URL as Markdown.",
+      "arguments": [
+        { "name": "url", "description": "URL to fetch", "required": true }
+      ],
+      "text": "Use web_fetch on {url} with format=markdown. Show me the full Markdown content."
+    },
+    {
+      "name": "ai_chat_full",
+      "description": "Ask a chatbot (ChatGPT/Gemini/Perplexity/Copilot) and show answer + sources.",
+      "arguments": [
+        { "name": "model", "description": "chatgpt | gemini | perplexity | copilot", "required": true },
+        { "name": "topic", "description": "What to ask", "required": true }
+      ],
+      "text": "Use ai_chat_completion with model={model} to ask: \"{topic}\". Show the full answer, all sources, and any subqueries the model used."
+    },
+    {
+      "name": "account_check",
+      "description": "Show my Massive credit balance.",
+      "arguments": [],
+      "text": "Call account_status. Report my remaining credits and the low-balance flag; if low_balance is true, share the top-up link."
+    }
+  ],
   "compatibility": {
     "claude_desktop": "*",
     "platforms": ["darwin", "win32", "linux"],
