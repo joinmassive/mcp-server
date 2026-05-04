@@ -69,6 +69,8 @@ Fetch any URL. Returns Markdown by default (best for LLMs).
 | `country` | string (ISO 3166-1 alpha-2) | — |   |
 | `city` | string | — |   |
 | `device` | string | — | Device emulation name |
+| `expiration` | integer (0–365) | — | Days the cached result is reused. `0` = always live (good for prices, scores). |
+| `difficulty` | `"low"` \| `"medium"` \| `"high"` | `"low"` | Anti-bot evasion strength. Multipliers: `medium`=2×, `high`=premium. |
 
 Example prompt: *"Use the Massive MCP server to fetch https://news.ycombinator.com and summarise the top stories."*
 
@@ -82,6 +84,9 @@ Google search results, parsed into structured JSON.
 | `country` | string (ISO) | — |
 | `city` | string | — |
 | `max_results` | number | 10 |
+| `expiration` | integer (0–365) | — |
+| `language` | string | — |
+| `display` | string | — |
 
 Returns: `{ organic, ai_overview, people_also_ask, query }`.
 
@@ -112,6 +117,10 @@ Chatbot answer with sources.
 | `model` | `"chatgpt"` \| `"gemini"` \| `"perplexity"` \| `"copilot"` | `"chatgpt"` |
 | `country` | string (ISO) | — |
 | `city` | string | — |
+| `expiration` | integer (0–365) | — |
+| `language` | string | — |
+| `display` | string | — |
+| `device` | string | — |
 
 Returns: `{ completion, sources, model, subqueries? }`.
 
