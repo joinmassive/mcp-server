@@ -8,6 +8,7 @@ import { registerWebFetch } from "./tools/web-fetch.js";
 import { registerWebSearch } from "./tools/web-search.js";
 import { registerAiChat } from "./tools/ai-chat.js";
 import { registerAccountStatus } from "./tools/account-status.js";
+import { registerResources } from "./resources/index.js";
 
 export function createServer(client?: MassiveClient): McpServer {
   const server = new McpServer({ name: PACKAGE_NAME, version: PACKAGE_VERSION });
@@ -16,6 +17,7 @@ export function createServer(client?: MassiveClient): McpServer {
   registerWebSearch(server, c);
   registerAiChat(server, c);
   registerAccountStatus(server, c);
+  registerResources(server);
   return server;
 }
 
