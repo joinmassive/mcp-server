@@ -17,6 +17,13 @@ export const webFetchInput = {
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code (e.g. 'US', 'DE')"),
   city: z.string().optional().describe("City name for geo-targeting"),
   device: z.string().optional().describe("Device emulation name (e.g. 'iphone-15')"),
+  expiration: z
+    .number()
+    .int("expiration must be an integer (days)")
+    .min(0, "expiration must be 0–365 days")
+    .max(365, "expiration must be 0–365 days")
+    .optional()
+    .describe("Days the cached result is reused (0 = always live; default 1)."),
 };
 
 const InputSchema = z.object(webFetchInput);
@@ -35,6 +42,7 @@ export async function webFetchHandler(input: Input, client: MassiveClient): Prom
       country: parsed.country,
       city: parsed.city,
       device: parsed.device,
+      expiration: parsed.expiration,
     });
 
     const structured: Record<string, unknown> = {
