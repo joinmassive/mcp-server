@@ -131,4 +131,36 @@ describe("aiChatHandler", () => {
     const [reqUrl] = fetchSpy.mock.calls[0];
     expect(reqUrl).not.toMatch(/expiration=/);
   });
+
+  it("forwards language and display params", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ completion: "<p>x</p>", sources: "", model: "chatgpt" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await aiChatHandler({ prompt: "hola", language: "spanish", display: "spa" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/language=spanish/);
+    expect(reqUrl).toMatch(/display=spa/);
+  });
+
+  it("omits language and display when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify({ completion: "<p>x</p>", sources: "", model: "chatgpt" }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await aiChatHandler({ prompt: "hi" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/language=/);
+    expect(reqUrl).not.toMatch(/display=/);
+  });
 });

@@ -24,6 +24,18 @@ export const aiChatInput = {
     .max(365, "expiration must be 0–365 days")
     .optional()
     .describe("Days the cached result is reused (0 = always live; default 1)."),
+  language: z
+    .string()
+    .min(2)
+    .max(64)
+    .optional()
+    .describe("Conversation language. Accepts language name (e.g. 'spanish') or ISO 639-2 code (e.g. 'spa')."),
+  display: z
+    .string()
+    .min(2)
+    .max(64)
+    .optional()
+    .describe("UI display language. Same format as `language`."),
 };
 
 const InputSchema = z.object(aiChatInput);
@@ -48,6 +60,8 @@ export async function aiChatHandler(input: Input, client: MassiveClient): Promis
       city: parsed.city,
       format: "json",
       expiration: parsed.expiration,
+      language: parsed.language,
+      display: parsed.display,
     });
 
     const out = {
