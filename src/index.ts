@@ -9,6 +9,7 @@ import { registerWebSearch } from "./tools/web-search.js";
 import { registerAiChat } from "./tools/ai-chat.js";
 import { registerAccountStatus } from "./tools/account-status.js";
 import { registerResources } from "./resources/index.js";
+import { registerPrompts } from "./prompts/index.js";
 
 export function createServer(client?: MassiveClient): McpServer {
   const server = new McpServer({ name: PACKAGE_NAME, version: PACKAGE_VERSION });
@@ -18,6 +19,7 @@ export function createServer(client?: MassiveClient): McpServer {
   registerAiChat(server, c);
   registerAccountStatus(server, c);
   registerResources(server);
+  registerPrompts(server);
   return server;
 }
 

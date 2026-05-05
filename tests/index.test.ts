@@ -29,4 +29,21 @@ describe("createServer", () => {
       resourceSpy.mockRestore();
     }
   });
+
+  it("createServer registers the four MCP prompts", async () => {
+    const { McpServer } = await import("@modelcontextprotocol/sdk/server/mcp.js");
+    const promptSpy = vi.spyOn(McpServer.prototype, "prompt");
+    try {
+      createServer();
+      const names = promptSpy.mock.calls.map((c) => c[0] as string).sort();
+      expect(names).toEqual([
+        "account_check",
+        "ai_chat_full",
+        "web_fetch_markdown",
+        "web_search_full",
+      ]);
+    } finally {
+      promptSpy.mockRestore();
+    }
+  });
 });
