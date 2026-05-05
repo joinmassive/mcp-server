@@ -73,16 +73,19 @@ export async function webSearchHandler(input: Input, client: MassiveClient): Pro
 }
 
 export function registerWebSearch(server: McpServer, client: MassiveClient): void {
-  server.tool(
+  server.registerTool(
     "web_search",
-    [
-      "Google search results parsed into structured JSON. Returns organic results, AI overview (if present), and 'people also ask' questions.",
-      "",
-      "Cost: 1 credit base. No multipliers.",
-      "Use expiration=0 for always-live results; default expiration=1 (day) reuses cached SERPs.",
-      "Localize with country, subdivision, city, language, display.",
-    ].join("\n"),
-    webSearchInput,
+    {
+      title: "Web search",
+      description: [
+        "Google search results parsed into structured JSON. Returns organic results, AI overview (if present), and 'people also ask' questions.",
+        "",
+        "Cost: 1 credit base. No multipliers.",
+        "Use expiration=0 for always-live results; default expiration=1 (day) reuses cached SERPs.",
+        "Localize with country, subdivision, city, language, display.",
+      ].join("\n"),
+      inputSchema: webSearchInput,
+    },
     async (args) => webSearchHandler(args, client),
   );
 }

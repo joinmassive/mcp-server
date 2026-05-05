@@ -78,21 +78,24 @@ export async function webFetchHandler(input: Input, client: MassiveClient): Prom
 }
 
 export function registerWebFetch(server: McpServer, client: MassiveClient): void {
-  server.tool(
+  server.registerTool(
     "web_fetch",
-    [
-      "Fetch any URL through Massive. Returns Markdown by default (best for LLM consumption); also supports rendered HTML and raw HTML.",
-      "Handles JS rendering, captcha solving, and 195+ country geo-targeting.",
-      "",
-      "Cost: 1 credit base. Multipliers stack:",
-      "- difficulty=medium → 2×",
-      "- difficulty=high → premium (higher multiplier; use only if low fails)",
-      "- Geo-targeting (country/city) does not currently change cost.",
-      "",
-      "Use expiration=0 for always-live data (prices, scores). Default expiration=1 (day) reuses cached results.",
-      "Live pricing: https://joinmassive.com/pricing",
-    ].join("\n"),
-    webFetchInput,
+    {
+      title: "Web fetch",
+      description: [
+        "Fetch any URL through Massive. Returns Markdown by default (best for LLM consumption); also supports rendered HTML and raw HTML.",
+        "Handles JS rendering, captcha solving, and 195+ country geo-targeting.",
+        "",
+        "Cost: 1 credit base. Multipliers stack:",
+        "- difficulty=medium → 2×",
+        "- difficulty=high → premium (higher multiplier; use only if low fails)",
+        "- Geo-targeting (country/city) does not currently change cost.",
+        "",
+        "Use expiration=0 for always-live data (prices, scores). Default expiration=1 (day) reuses cached results.",
+        "Live pricing: https://joinmassive.com/pricing",
+      ].join("\n"),
+      inputSchema: webFetchInput,
+    },
     async (args) => webFetchHandler(args, client),
   );
 }

@@ -95,16 +95,19 @@ export async function aiChatHandler(input: Input, client: MassiveClient): Promis
 }
 
 export function registerAiChat(server: McpServer, client: MassiveClient): void {
-  server.tool(
+  server.registerTool(
     "ai_chat_completion",
-    [
-      "Get a chatbot answer (ChatGPT, Gemini, Perplexity, or Copilot) with structured sources.",
-      "",
-      "Cost: 1 credit base. No multipliers.",
-      "Use expiration=0 for fresh answers; default expiration=1 (day) reuses cached responses.",
-      "Localize with country, subdivision, city, language, display, device.",
-    ].join("\n"),
-    aiChatInput,
+    {
+      title: "AI chat completion",
+      description: [
+        "Get a chatbot answer (ChatGPT, Gemini, Perplexity, or Copilot) with structured sources.",
+        "",
+        "Cost: 1 credit base. No multipliers.",
+        "Use expiration=0 for fresh answers; default expiration=1 (day) reuses cached responses.",
+        "Localize with country, subdivision, city, language, display, device.",
+      ].join("\n"),
+      inputSchema: aiChatInput,
+    },
     async (args) => aiChatHandler(args, client),
   );
 }

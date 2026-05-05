@@ -38,10 +38,13 @@ export async function accountStatusHandler(client: MassiveClient): Promise<CallT
 }
 
 export function registerAccountStatus(server: McpServer, client: MassiveClient): void {
-  server.tool(
+  server.registerTool(
     "account_status",
-    "Returns the user's remaining credit balance. Free; does not consume credits.",
-    {},
+    {
+      title: "Account status",
+      description: "Returns the user's remaining credit balance. Free; does not consume credits.",
+      inputSchema: {},
+    },
     async () => accountStatusHandler(client),
   );
 }
