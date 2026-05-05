@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "massive-mcp",
   "display_name": "Massive Web Render",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Real-time web access for AI agents — fetch URLs, search Google, query AI chatbots.",
   "long_description": "Official MCP server for the Massive Web Render API.\n\nFour tools: web_fetch (any URL → Markdown/HTML, with JS rendering, captchas, and geo-targeting), web_search (parsed Google SERP with AI overview + people-also-asked), ai_chat_completion (ChatGPT/Gemini/Perplexity/Copilot answers with structured sources), account_status (credits remaining).\n\nThree reference resources surface inside MCP clients (Connectors panel / @-menu): docs://massive/pricing, docs://massive/geotargeting, docs://massive/changelog. Four starter prompts ship out of the box.\n\nPay-as-you-go pricing — see https://joinmassive.com/pricing. MIT-licensed; source at https://github.com/joinmassive/mcp-server. Compatible with Claude Desktop, Claude Code, Cursor, Continue, Cody, Windsurf, and any MCP-compatible client.",
   "author": { "name": "Massive Computing, Inc.", "url": "https://joinmassive.com" },
