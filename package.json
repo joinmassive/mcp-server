@@ -19,9 +19,10 @@
   },
   "scripts": {
     "resources": "node scripts/bundle-resources.mjs",
-    "prebuild": "npm run resources",
-    "pretest": "npm run resources",
-    "pretypecheck": "npm run resources",
+    "icon": "node scripts/bundle-icon.mjs",
+    "prebuild": "npm run resources && npm run icon",
+    "pretest": "npm run resources && npm run icon",
+    "pretypecheck": "npm run resources && npm run icon",
     "build": "tsup src/index.ts --format esm --dts --clean --target node20",
     "dev": "tsup src/index.ts --format esm --watch --target node20",
     "test": "vitest run",
