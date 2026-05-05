@@ -105,22 +105,23 @@ describe("toolError surfaces upstream status to the model", () => {
     vi.restoreAllMocks();
   });
 
-  it("includes status in structuredContent when err is a MassiveClientError", async () => {
+  it("includes status and body in structuredContent when err is a MassiveClientError", async () => {
     const fetchSpy = vi.fn().mockResolvedValue(new Response("server boom", { status: 502 }));
     const client = new MassiveClient({ fetchImpl: fetchSpy });
     const result = await accountStatusHandler(client);
     expect(result.isError).toBe(true);
-    expect(result.structuredContent).toEqual({ status: 502 });
+    expect(result.structuredContent).toEqual({ status: 502, body: "server boom" });
   });
 
-  it("does not leak detail.body into tool output", async () => {
-    const SECRET_BODY = "INTERNAL_SECRET_TRACE_xyz123";
+  it("propagates upstream body to tool output so the model can self-correct", async () => {
+    const UPSTREAM_BODY = "language must be a valid ISO 639-1 code";
     const fetchSpy = vi.fn().mockResolvedValue(
-      new Response(SECRET_BODY, { status: 500, headers: { "content-type": "text/plain" } }),
+      new Response(UPSTREAM_BODY, { status: 422, headers: { "content-type": "text/plain" } }),
     );
     const client = new MassiveClient({ fetchImpl: fetchSpy });
     const result = await accountStatusHandler(client);
     expect(result.isError).toBe(true);
-    expect(JSON.stringify(result)).not.toContain(SECRET_BODY);
+    expect(JSON.stringify(result)).toContain(UPSTREAM_BODY);
+    expect(result.structuredContent).toMatchObject({ status: 422, body: UPSTREAM_BODY });
   });
 });

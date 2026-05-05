@@ -17,6 +17,37 @@ export const aiChatInput = {
     .describe("Which chatbot to query"),
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code"),
   city: z.string().optional().describe("City name for geo-targeting"),
+  subdivision: z
+    .string()
+    .min(1)
+    .max(8)
+    .optional()
+    .describe("ISO 3166-2 subdivision code (e.g. 'TN' for Tennessee). Case-insensitive. Ignored if `city` is set."),
+  expiration: z
+    .number()
+    .int("expiration must be an integer (days)")
+    .min(0, "expiration must be 0–365 days")
+    .max(365, "expiration must be 0–365 days")
+    .optional()
+    .describe("Days the cached result is reused (0 = always live; default 1)."),
+  language: z
+    .string()
+    .min(2)
+    .max(64)
+    .optional()
+    .describe("Conversation language. Common name (e.g. 'spanish'), two-letter ISO code (e.g. 'es'), or Google code. Case-insensitive."),
+  display: z
+    .string()
+    .min(2)
+    .max(64)
+    .optional()
+    .describe("UI display language. Same format as `language`."),
+  device: z
+    .string()
+    .min(1)
+    .max(64)
+    .optional()
+    .describe("Device emulation name (e.g. 'iphone-15')."),
 };
 
 const InputSchema = z.object(aiChatInput);
@@ -39,7 +70,12 @@ export async function aiChatHandler(input: Input, client: MassiveClient): Promis
       model: parsed.model,
       country: parsed.country,
       city: parsed.city,
+      subdivision: parsed.subdivision,
       format: "json",
+      expiration: parsed.expiration,
+      language: parsed.language,
+      display: parsed.display,
+      device: parsed.device,
     });
 
     const out = {
@@ -61,7 +97,13 @@ export async function aiChatHandler(input: Input, client: MassiveClient): Promis
 export function registerAiChat(server: McpServer, client: MassiveClient): void {
   server.tool(
     "ai_chat_completion",
-    "Get a chatbot answer (ChatGPT, Gemini, Perplexity, or Copilot) with structured sources. Cost: 1 credit base.",
+    [
+      "Get a chatbot answer (ChatGPT, Gemini, Perplexity, or Copilot) with structured sources.",
+      "",
+      "Cost: 1 credit base. No multipliers.",
+      "Use expiration=0 for fresh answers; default expiration=1 (day) reuses cached responses.",
+      "Localize with country, subdivision, city, language, display, device.",
+    ].join("\n"),
     aiChatInput,
     async (args) => aiChatHandler(args, client),
   );

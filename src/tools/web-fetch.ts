@@ -16,7 +16,26 @@ export const webFetchInput = {
     .describe("Output format. 'markdown' is best for LLM consumption."),
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code (e.g. 'US', 'DE')"),
   city: z.string().optional().describe("City name for geo-targeting"),
+  subdivision: z
+    .string()
+    .min(1)
+    .max(8)
+    .optional()
+    .describe("ISO 3166-2 subdivision code (e.g. 'TN' for Tennessee). Case-insensitive. Ignored if `city` is set."),
   device: z.string().optional().describe("Device emulation name (e.g. 'iphone-15')"),
+  expiration: z
+    .number()
+    .int("expiration must be an integer (days)")
+    .min(0, "expiration must be 0–365 days")
+    .max(365, "expiration must be 0–365 days")
+    .optional()
+    .describe("Days the cached result is reused (0 = always live; default 1)."),
+  difficulty: z
+    .enum(["low", "medium", "high"])
+    .default("low")
+    .describe(
+      "Anti-bot evasion strength. Multipliers: low=1×, medium=2×, high=premium (further multiplier). Use higher only if low fails.",
+    ),
 };
 
 const InputSchema = z.object(webFetchInput);
@@ -34,7 +53,10 @@ export async function webFetchHandler(input: Input, client: MassiveClient): Prom
       format: parsed.format,
       country: parsed.country,
       city: parsed.city,
+      subdivision: parsed.subdivision,
       device: parsed.device,
+      expiration: parsed.expiration,
+      difficulty: parsed.difficulty,
     });
 
     const structured: Record<string, unknown> = {
@@ -58,7 +80,18 @@ export async function webFetchHandler(input: Input, client: MassiveClient): Prom
 export function registerWebFetch(server: McpServer, client: MassiveClient): void {
   server.tool(
     "web_fetch",
-    "Fetch any URL through Massive. Returns Markdown by default (best for LLM consumption); also supports rendered HTML and raw HTML. Handles JS rendering, captcha solving, and geo-targeting (195+ countries). Cost: 1 credit base; premium features (rendered format, geo-targeting) add multipliers — see https://joinmassive.com/pricing.",
+    [
+      "Fetch any URL through Massive. Returns Markdown by default (best for LLM consumption); also supports rendered HTML and raw HTML.",
+      "Handles JS rendering, captcha solving, and 195+ country geo-targeting.",
+      "",
+      "Cost: 1 credit base. Multipliers stack:",
+      "- difficulty=medium → 2×",
+      "- difficulty=high → premium (higher multiplier; use only if low fails)",
+      "- Geo-targeting (country/city) does not currently change cost.",
+      "",
+      "Use expiration=0 for always-live data (prices, scores). Default expiration=1 (day) reuses cached results.",
+      "Live pricing: https://joinmassive.com/pricing",
+    ].join("\n"),
     webFetchInput,
     async (args) => webFetchHandler(args, client),
   );

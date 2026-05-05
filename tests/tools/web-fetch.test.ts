@@ -77,4 +77,121 @@ describe("webFetchHandler", () => {
       expect(fetchSpy).not.toHaveBeenCalled();
     },
   );
+
+  it("forwards expiration when provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler({ url: "https://example.com", expiration: 7 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/expiration=7/);
+  });
+
+  it("forwards expiration=0 (live, no cache) without omitting it", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler({ url: "https://example.com", expiration: 0 }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/expiration=0/);
+  });
+
+  it("omits expiration from query when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler({ url: "https://example.com" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/expiration=/);
+  });
+
+  it.each([
+    { val: -1, hint: "0–365" },
+    { val: 366, hint: "0–365" },
+    { val: 1.5, hint: "integer" },
+  ])("rejects invalid expiration $val", async ({ val, hint }) => {
+    const fetchSpy = vi.fn();
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+    const result = await webFetchHandler(
+      { url: "https://example.com", expiration: val } as never,
+      client,
+    );
+    expect(result.isError).toBe(true);
+    expect(result.content[0].text.toLowerCase()).toMatch(new RegExp(hint));
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("defaults difficulty to 'low' (sent as query param)", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler({ url: "https://example.com" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/difficulty=low/);
+  });
+
+  it.each(["low", "medium", "high"] as const)(
+    "forwards difficulty=%s",
+    async (difficulty) => {
+      const fetchSpy = vi.fn().mockResolvedValue(
+        new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+      );
+      const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+      await webFetchHandler({ url: "https://example.com", difficulty }, client);
+
+      const [reqUrl] = fetchSpy.mock.calls[0];
+      expect(reqUrl).toMatch(new RegExp(`difficulty=${difficulty}`));
+    },
+  );
+
+  it("rejects invalid difficulty value", async () => {
+    const fetchSpy = vi.fn();
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+    const result = await webFetchHandler(
+      { url: "https://example.com", difficulty: "extreme" } as never,
+      client,
+    );
+    expect(result.isError).toBe(true);
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("forwards subdivision when provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler(
+      { url: "https://example.com", country: "US", subdivision: "TN" },
+      client,
+    );
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/subdivision=TN/);
+  });
+
+  it("omits subdivision when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler({ url: "https://example.com" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/subdivision=/);
+  });
 });
