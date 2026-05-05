@@ -9,7 +9,7 @@ Routes search, AI chat, and browser requests through 190+ countries, optionally 
 | Param | Format | Notes |
 | --- | --- | --- |
 | `country` | Two-letter ISO code | Case-insensitive (e.g. `us`, `DE`, `jp`). Random country if omitted. |
-| `subdivision` | ISO 3166-2 first-level alphanumeric | Case-insensitive (e.g. `tn` for Tennessee, `bav` for Bavaria). **Not currently exposed as an MCP tool param.** |
+| `subdivision` | ISO 3166-2 first-level alphanumeric | Case-insensitive (e.g. `tn` for Tennessee, `bav` for Bavaria). |
 | `city` | GeoNames common name | Case-sensitive. URL-encode spaces as `+` or `%20`. |
 
 **Precedence:** `city` takes precedence over `subdivision` if both are set.

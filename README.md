@@ -68,6 +68,7 @@ Fetch any URL. Returns Markdown by default (best for LLMs).
 | `format` | `"markdown"` \| `"rendered"` \| `"raw"` | `"markdown"` |   |
 | `country` | string (ISO 3166-1 alpha-2) | — |   |
 | `city` | string | — |   |
+| `subdivision` | string | — | ISO 3166-2 (e.g. `"TN"`). Ignored if `city` is set. |
 | `device` | string | — | Device emulation name |
 | `expiration` | integer (0–365) | — | Days the cached result is reused. `0` = always live (good for prices, scores). |
 | `difficulty` | `"low"` \| `"medium"` \| `"high"` | `"low"` | Anti-bot evasion strength. Multipliers: `medium`=2×, `high`=premium. |
@@ -83,6 +84,7 @@ Google search results, parsed into structured JSON.
 | `query` (required, ≤ 255 chars) | string | — |
 | `country` | string (ISO) | — |
 | `city` | string | — |
+| `subdivision` | string | — |
 | `max_results` | number | 10 |
 | `expiration` | integer (0–365) | — |
 | `language` | string | — |
@@ -117,6 +119,7 @@ Chatbot answer with sources.
 | `model` | `"chatgpt"` \| `"gemini"` \| `"perplexity"` \| `"copilot"` | `"chatgpt"` |
 | `country` | string (ISO) | — |
 | `city` | string | — |
+| `subdivision` | string | — |
 | `expiration` | integer (0–365) | — |
 | `language` | string | — |
 | `display` | string | — |

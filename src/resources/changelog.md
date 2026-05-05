@@ -4,9 +4,9 @@
 
 ### Added
 - New tool params:
-  - `web_fetch`: `expiration`, `difficulty`
-  - `web_search`: `expiration`, `language`, `display`
-  - `ai_chat_completion`: `expiration`, `language`, `display`, `device`
+  - `web_fetch`: `expiration`, `difficulty`, `subdivision`
+  - `web_search`: `expiration`, `language`, `display`, `subdivision`
+  - `ai_chat_completion`: `expiration`, `language`, `display`, `device`, `subdivision`
 - MCP resources for in-client reference: `docs://massive/pricing`, `docs://massive/geotargeting`, `docs://massive/changelog`.
 - MCPB starter prompts: `web_search_full`, `web_fetch_markdown`, `ai_chat_full`, `account_check`.
 - README sections: "Pricing & cost control", "Resources".
@@ -19,7 +19,6 @@
 - Async / `mode=async` polling.
 - Sticky `session` cookie.
 - Search pagination (`serps`/`size`/`offset`).
-- `subdivision` tool param (use the `docs://massive/geotargeting` resource for reference).
 - New square icon (current icon autoscales fine in Claude Desktop).
 
 ## v0.1.0 (2026-05-01)
