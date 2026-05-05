@@ -80,6 +80,17 @@ async function main(): Promise<void> {
     }),
   );
 
+  results.push(
+    await run("web_search (country=us, subdivision=tn)", async () => {
+      const html = await client.get<string>("/search", {
+        terms: "local restaurants",
+        country: "us",
+        subdivision: "tn",
+      });
+      return typeof html === "string" && html.length > 1000;
+    }),
+  );
+
   for (const r of results) {
     console.error(`${r.ok ? "PASS" : "FAIL"}  ${r.name}  ${r.detail}`);
   }
