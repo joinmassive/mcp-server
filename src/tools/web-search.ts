@@ -80,7 +80,7 @@ export function registerWebSearch(server: McpServer, client: MassiveClient): voi
       "",
       "Cost: 1 credit base. No multipliers.",
       "Use expiration=0 for always-live results; default expiration=1 (day) reuses cached SERPs.",
-      "Localize with country, city, language, display.",
+      "Localize with country, subdivision, city, language, display.",
     ].join("\n"),
     webSearchInput,
     async (args) => webSearchHandler(args, client),

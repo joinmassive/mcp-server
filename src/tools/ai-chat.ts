@@ -102,7 +102,7 @@ export function registerAiChat(server: McpServer, client: MassiveClient): void {
       "",
       "Cost: 1 credit base. No multipliers.",
       "Use expiration=0 for fresh answers; default expiration=1 (day) reuses cached responses.",
-      "Localize with country, city, language, display, device.",
+      "Localize with country, subdivision, city, language, display, device.",
     ].join("\n"),
     aiChatInput,
     async (args) => aiChatHandler(args, client),
