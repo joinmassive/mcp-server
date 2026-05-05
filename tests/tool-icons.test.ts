@@ -16,7 +16,7 @@ describe("tools/list icons", () => {
     delete process.env.MASSIVE_TOKEN;
   });
 
-  it("each tool has icons[] with at least one image/png entry sourced from a data URI", async () => {
+  it("each tool has icons[] with 48x48 first and 512x512 second, both as PNG data URIs", async () => {
     const server = createServer();
     // Access the underlying protocol instance to invoke the tools/list handler directly.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -32,14 +32,22 @@ describe("tools/list icons", () => {
     const names = tools.map((t) => t.name).sort();
     expect(names).toEqual(EXPECTED_TOOL_NAMES);
 
-    // Every tool must carry icons.
+    // Every tool must carry exactly 2 icon entries (48x48 and 512x512).
     for (const tool of tools) {
       expect(tool.icons, `${tool.name} missing icons`).toBeDefined();
-      expect(tool.icons!.length, `${tool.name} icons is empty`).toBeGreaterThanOrEqual(1);
+      expect(tool.icons!.length, `${tool.name} icons count`).toBe(2);
 
-      const icon = tool.icons![0];
-      expect(icon.mimeType, `${tool.name} icon mimeType`).toBe("image/png");
-      expect(icon.src, `${tool.name} icon src`).toMatch(/^data:image\/png;base64,/);
+      const [icon48, icon512] = tool.icons!;
+
+      // First entry: 48x48 badge variant.
+      expect(icon48.mimeType, `${tool.name} icon48 mimeType`).toBe("image/png");
+      expect(icon48.src, `${tool.name} icon48 src`).toMatch(/^data:image\/png;base64,/);
+      expect(icon48.sizes, `${tool.name} icon48 sizes`).toEqual(["48x48"]);
+
+      // Second entry: 512x512 full-size variant.
+      expect(icon512.mimeType, `${tool.name} icon512 mimeType`).toBe("image/png");
+      expect(icon512.src, `${tool.name} icon512 src`).toMatch(/^data:image\/png;base64,/);
+      expect(icon512.sizes, `${tool.name} icon512 sizes`).toEqual(["512x512"]);
     }
   });
 });
