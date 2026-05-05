@@ -17,6 +17,12 @@ export const aiChatInput = {
     .describe("Which chatbot to query"),
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code"),
   city: z.string().optional().describe("City name for geo-targeting"),
+  subdivision: z
+    .string()
+    .min(1)
+    .max(8)
+    .optional()
+    .describe("ISO 3166-2 subdivision code (e.g. 'TN' for Tennessee). Case-insensitive. Ignored if `city` is set."),
   expiration: z
     .number()
     .int("expiration must be an integer (days)")
@@ -64,6 +70,7 @@ export async function aiChatHandler(input: Input, client: MassiveClient): Promis
       model: parsed.model,
       country: parsed.country,
       city: parsed.city,
+      subdivision: parsed.subdivision,
       format: "json",
       expiration: parsed.expiration,
       language: parsed.language,
