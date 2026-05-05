@@ -1,6 +1,6 @@
 {
   "name": "@joinmassive/mcp-server",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Official MCP server for the Massive Web Render API. Real-time web access for AI agents — fetch any URL, search Google, query AI chatbots — with JS rendering, captcha solving, and 195+ country geo-targeting.",
   "license": "MIT",
   "type": "module",
