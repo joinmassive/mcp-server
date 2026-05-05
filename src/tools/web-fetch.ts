@@ -16,6 +16,12 @@ export const webFetchInput = {
     .describe("Output format. 'markdown' is best for LLM consumption."),
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code (e.g. 'US', 'DE')"),
   city: z.string().optional().describe("City name for geo-targeting"),
+  subdivision: z
+    .string()
+    .min(1)
+    .max(8)
+    .optional()
+    .describe("ISO 3166-2 subdivision code (e.g. 'TN' for Tennessee). Case-insensitive. Ignored if `city` is set."),
   device: z.string().optional().describe("Device emulation name (e.g. 'iphone-15')"),
   expiration: z
     .number()
@@ -47,6 +53,7 @@ export async function webFetchHandler(input: Input, client: MassiveClient): Prom
       format: parsed.format,
       country: parsed.country,
       city: parsed.city,
+      subdivision: parsed.subdivision,
       device: parsed.device,
       expiration: parsed.expiration,
       difficulty: parsed.difficulty,

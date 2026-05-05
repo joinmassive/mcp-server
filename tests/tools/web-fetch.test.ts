@@ -167,4 +167,31 @@ describe("webFetchHandler", () => {
     expect(result.isError).toBe(true);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
+
+  it("forwards subdivision when provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler(
+      { url: "https://example.com", country: "US", subdivision: "TN" },
+      client,
+    );
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).toMatch(/subdivision=TN/);
+  });
+
+  it("omits subdivision when not provided", async () => {
+    const fetchSpy = vi.fn().mockResolvedValue(
+      new Response("ok", { status: 200, headers: { "content-type": "text/plain" } }),
+    );
+    const client = new MassiveClient({ fetchImpl: fetchSpy });
+
+    await webFetchHandler({ url: "https://example.com" }, client);
+
+    const [reqUrl] = fetchSpy.mock.calls[0];
+    expect(reqUrl).not.toMatch(/subdivision=/);
+  });
 });
