@@ -13,6 +13,12 @@ export const webSearchInput = {
     .describe("Search query (max 255 chars)"),
   country: z.string().length(2).optional().describe("ISO 3166-1 alpha-2 country code"),
   city: z.string().optional().describe("City name for geo-targeting"),
+  subdivision: z
+    .string()
+    .min(1)
+    .max(8)
+    .optional()
+    .describe("ISO 3166-2 subdivision code (e.g. 'TN' for Tennessee). Case-insensitive. Ignored if `city` is set."),
   max_results: z.number().int().min(1).max(50).default(10).describe("Max organic results to return (default 10)"),
   expiration: z
     .number()
@@ -48,6 +54,7 @@ export async function webSearchHandler(input: Input, client: MassiveClient): Pro
       terms: parsed.query,
       country: parsed.country,
       city: parsed.city,
+      subdivision: parsed.subdivision,
       awaiting: ["ai", "answers"],
       expiration: parsed.expiration,
       language: parsed.language,
