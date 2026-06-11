@@ -1,4 +1,4 @@
-import archiver from "archiver";
+import { ZipArchive } from "archiver";
 import { execFileSync } from "node:child_process";
 import { copyFileSync, createWriteStream, existsSync, mkdtempSync, rmSync, statSync } from "node:fs";
 import { mkdir, readFile } from "node:fs/promises";
@@ -43,7 +43,7 @@ await mkdir(outDir, { recursive: true });
 const outPath = resolve(outDir, `${manifest.name}-${manifest.version}.mcpb`);
 
 const output = createWriteStream(outPath);
-const archive = archiver("zip", { zlib: { level: 9 } });
+const archive = new ZipArchive({ zlib: { level: 9 } });
 
 try {
   archive.pipe(output);
