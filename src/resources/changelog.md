@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.2.2 (2026-06-11)
+
+### Fixed
+- **`web_fetch` body missing in clients that read `structuredContent`** (e.g. Claude Cowork): the page body was returned only in the text content block, while `structuredContent` carried just `{format, url, bytes}` metadata. Clients that show the model `structuredContent` instead of the content blocks received no page body. The body is now included as `structuredContent.body`, making the two representations functionally equivalent per the MCP spec (MASS-739).
+
 ## v0.2.1 (2026-05-05)
 
 Polish on top of v0.2.0 — visual fixes for Claude Desktop and a runtime API migration. No new tool capabilities.

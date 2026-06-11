@@ -59,10 +59,13 @@ export async function webFetchHandler(input: Input, client: MassiveClient): Prom
       difficulty: parsed.difficulty,
     });
 
+    // `body` must be present here too: some clients (e.g. Claude Cowork) show the
+    // model only structuredContent, others only the text content blocks (MASS-739).
     const structured: Record<string, unknown> = {
       format: parsed.format,
       url: parsed.url,
       bytes: Buffer.byteLength(body, "utf8"),
+      body,
     };
     if (parsed.country) structured.country = parsed.country;
     if (parsed.city) structured.city = parsed.city;

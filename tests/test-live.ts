@@ -1,4 +1,5 @@
 import { MassiveClient } from "../src/client.js";
+import { webFetchHandler } from "../src/tools/web-fetch.js";
 
 interface UserRow {
   email: string;
@@ -27,6 +28,19 @@ async function main(): Promise<void> {
         format: "markdown",
       });
       return body.toLowerCase().includes("example domain");
+    }),
+  );
+
+  results.push(
+    await run("web_fetch handler: structuredContent.body matches text content (MASS-739)", async () => {
+      const result = await webFetchHandler(
+        { url: "https://example.com", format: "markdown", difficulty: "low" },
+        client,
+      );
+      if (result.isError) return false;
+      const text = result.content[0]?.type === "text" ? result.content[0].text : "";
+      const sc = result.structuredContent as { body?: string } | undefined;
+      return Boolean(sc?.body) && sc?.body === text && text.toLowerCase().includes("example domain");
     }),
   );
 

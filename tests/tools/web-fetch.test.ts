@@ -27,9 +27,8 @@ describe("webFetchHandler", () => {
       format: "markdown",
       url: "https://example.com",
       bytes: 6,
+      body: "# Page",
     });
-    // Body must NOT be duplicated into structuredContent — already in content[0].text
-    expect(result.structuredContent).not.toHaveProperty("content");
   });
 
   it("forwards optional country, city, device and echoes them in structured output", async () => {
@@ -53,8 +52,8 @@ describe("webFetchHandler", () => {
       country: "DE",
       city: "Berlin",
       device: "iphone-15",
+      body: "ok",
     });
-    expect(result.structuredContent).not.toHaveProperty("content");
   });
 
   it("returns an MCP error result on upstream failure", async () => {
