@@ -50,8 +50,7 @@
     "url": "https://github.com/joinmassive/mcp-server/issues"
   },
   "publishConfig": {
-    "access": "public",
-    "provenance": true
+    "access": "public"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",

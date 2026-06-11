@@ -17,8 +17,11 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 22
-          cache: npm
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+
+      # Trusted publishing (OIDC) requires npm >= 11.5.1; Node 22 bundles npm 10.x.
+      - run: npm install -g npm@latest
 
       - run: npm ci
       - run: npm run lint
@@ -49,10 +52,9 @@ jobs:
             exit 1
           fi
 
-      - name: Publish to npm with provenance
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Auth via npm trusted publishing (OIDC); provenance is generated automatically.
+      - name: Publish to npm
+        run: npm publish
 
       - name: Create GitHub Release with MCPB asset
         uses: softprops/action-gh-release@v3
