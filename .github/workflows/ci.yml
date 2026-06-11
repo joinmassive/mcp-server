@@ -23,3 +23,5 @@ jobs:
       - run: npm run typecheck
       - run: npm test
       - run: npm run build
+      # Catches packaging breakage (e.g. archiver major bumps) before a release tag.
+      - run: npm run build:mcpb
