@@ -70,7 +70,7 @@ Fetch any URL. Returns Markdown by default (best for LLMs).
 | `city` | string | — |   |
 | `subdivision` | string | — | ISO 3166-2 (e.g. `"TN"`). Ignored if `city` is set. |
 | `device` | string | — | Device emulation name |
-| `expiration` | integer (0–365) | — | Days the cached result is reused. `0` = always live (good for prices, scores). |
+| `expiration` | integer (0–1) | — | Days the cached result is reused. `0` = always live (good for prices, scores). |
 | `difficulty` | `"low"` \| `"medium"` \| `"high"` | `"low"` | Anti-bot evasion strength. Multipliers: `medium`=2×, `high`=premium. |
 
 Example prompt: *"Use the Massive MCP server to fetch https://news.ycombinator.com and summarise the top stories."*
@@ -86,7 +86,7 @@ Google search results, parsed into structured JSON.
 | `city` | string | — |
 | `subdivision` | string | — |
 | `max_results` | number | 10 |
-| `expiration` | integer (0–365) | — |
+| `expiration` | integer (0–1) | — |
 | `language` | string | — |
 | `display` | string | — |
 

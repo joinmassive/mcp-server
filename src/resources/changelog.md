@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **`expiration`** in `web_search` and `web_fetch` accepts 0 or 1, in line with the API; other values are turned down with a message saying so.
+
 ## v0.2.2 (2026-06-11)
 
 ### Fixed
