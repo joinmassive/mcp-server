@@ -90,7 +90,13 @@ Google search results, parsed into structured JSON.
 | `language` | string | — |
 | `display` | string | — |
 
-Returns: `{ organic, ai_overview, people_also_ask, query }`.
+Returns: `{ organic, ai_overview, people_also_ask, query }`, plus `warnings` when there is something to report
+(for example a page whose results could not be read).
+
+Each organic result carries Google's link to the page, the same link the search API returns. When
+`url_is_redirect` is `true`, `url` is that Google link and the page's real address is not known yet: open it
+with `web_fetch` to read the page. `displayed_url` is the text Google prints under the title (an address,
+a breadcrumb, or "330+ followers"); it is not an address. `domain` is the result's site when the page shows it.
 
 Example shape:
 
@@ -98,9 +104,21 @@ Example shape:
 {
   "query": "best espresso machines 2026",
   "organic": [
-    { "title": "...", "url": "https://...", "snippet": "..." }
+    {
+      "position": 1,
+      "title": "...",
+      "url": "https://www.google.com/goto?url=...",
+      "url_is_redirect": true,
+      "displayed_url": "https://www.example.com › reviews › espresso",
+      "domain": "example.com",
+      "snippet": "..."
+    }
   ],
-  "ai_overview": { "answer": "...", "sources": [{ "domain": "wirecutter.com", "url": "https://..." }] },
+  "ai_overview": {
+    "text": "...",
+    "sources": [{ "label": "Wirecutter", "url": "https://www.google.com/goto?url=...", "url_is_redirect": true }],
+    "source_domains": ["nytimes.com"]
+  },
   "people_also_ask": [
     { "question": "What is the best espresso machine for beginners?", "answer": "" }
   ]

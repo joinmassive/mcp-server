@@ -4,13 +4,34 @@ import type { CheerioAPI } from "cheerio";
 export interface SerpOrganicResult {
   position: number;
   title: string;
-  url: string;
+  /**
+   * The result's link, made absolute. The page's real address when Google
+   * gives one; otherwise Google's own link to the page (see url_is_redirect).
+   * null only when the result has no usable link at all.
+   */
+  url: string | null;
+  /** True when `url` is Google's link to the page: the real address is not known until it is opened. */
+  url_is_redirect: boolean;
+  /** The text Google prints under the title, as printed. Not an address. */
+  displayed_url: string;
+  /** Host of the result (without "www."), or null when the page does not show it. */
+  domain: string | null;
   snippet: string;
+}
+
+export interface SerpAiOverviewSource {
+  /** The name Google shows on the link ("PCMag", "Reddit", or the cited page's title). */
+  label: string;
+  url: string;
+  url_is_redirect: boolean;
 }
 
 export interface SerpAiOverview {
   text: string;
-  sources: Array<{ domain: string; url: string }>;
+  /** One entry per distinct link inside the overview, in page order. */
+  sources: SerpAiOverviewSource[];
+  /** Sites the overview cites, from its favicons. Not paired with `sources`. */
+  source_domains: string[];
 }
 
 export interface SerpPaaItem {
@@ -23,6 +44,8 @@ export interface SerpResult {
   ai_overview: SerpAiOverview | null;
   people_also_ask: SerpPaaItem[];
   query: string;
+  /** Present only when there is something to report, e.g. results that could not be read. */
+  warnings?: string[];
 }
 
 export interface ParseSerpOptions {
@@ -32,12 +55,16 @@ export interface ParseSerpOptions {
 
 export function parseSerp(html: string, opts: ParseSerpOptions): SerpResult {
   const $ = cheerio.load(html);
-  return {
-    organic: extractOrganic($, opts.maxResults),
+  const organic = extractOrganic($, opts.maxResults);
+  const out: SerpResult = {
+    organic,
     ai_overview: extractAiOverview($),
     people_also_ask: extractPaa($, opts.query),
     query: opts.query,
   };
+  const warnings = [...organicWarnings($, organic.length), ...paaWarnings($, out.people_also_ask)];
+  if (warnings.length) out.warnings = warnings;
+  return out;
 }
 
 // ---------------------------------------------------------------------------
@@ -50,6 +77,51 @@ function domainOf(url: string): string {
   } catch {
     return "";
   }
+}
+
+const GOOGLE_ORIGIN = "https://www.google.com";
+const GOOGLE_HOST = /(^|\.)google\.[a-z]{2,3}(\.[a-z]{2})?$/i;
+
+export interface ResultLink {
+  url: string;
+  url_is_redirect: boolean;
+}
+
+/**
+ * Turns the href of a result link into an absolute URL.
+ *
+ * - A plain link to another site is returned as is.
+ * - Google's redirect links: `/url?q=<address>` gives the address; `/goto?url=<token>`
+ *   (and `/url?` with an opaque token) are returned as Google's link, made absolute,
+ *   without the per-session `gsessionid`, and flagged as redirects. Opening that link
+ *   leads to the page.
+ * - Any other link to a Google page (`/search?...`, a relative path) is not a result: null.
+ */
+export function resultLink(href: string): ResultLink | null {
+  const raw = href.trim();
+  if (!raw) return null;
+  const relative = !/^[a-z][a-z0-9+.-]*:/i.test(raw);
+  let u: URL;
+  try {
+    u = new URL(raw, GOOGLE_ORIGIN);
+  } catch {
+    return null;
+  }
+  if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+  if (GOOGLE_HOST.test(u.hostname) && (u.pathname === "/url" || u.pathname === "/goto")) {
+    const target = u.searchParams.get("q") ?? u.searchParams.get("url") ?? "";
+    if (/^https?:\/\//i.test(target)) return { url: target, url_is_redirect: false };
+    u.searchParams.delete("gsessionid");
+    return { url: u.toString(), url_is_redirect: true };
+  }
+  if (relative) return null;
+  return { url: raw, url_is_redirect: false };
+}
+
+/** Host of the text Google prints under a title, when it starts with an address. */
+function domainOfDisplayed(displayed: string): string | null {
+  const m = /^(https?:\/\/[^\s\u203a/]+)/i.exec(displayed);
+  return m ? domainOf(m[1]!) || null : null;
 }
 
 // Boilerplate strings Google injects into every AI Overview wrapper. If what's
@@ -120,49 +192,52 @@ function extractAiOverview($: CheerioAPI): SerpAiOverview | null {
   const cleaned = cleanAioText(rawText);
   if (cleaned.length < 60) return null;
 
-  // Sources — collect external links inside the AIO block.
-  const seen = new Set<string>();
-  const sources: Array<{ domain: string; url: string }> = [];
-  clone.find("a[href]").each((_i, el) => {
-    const href = $(el).attr("href") ?? "";
-    const target = href.startsWith("/url?")
-      ? (new URLSearchParams(href.slice(5)).get("url") ?? "")
-      : href;
-    if (!/^https?:\/\//.test(target)) return;
-    const d = domainOf(target);
-    if (!d) return;
-    if (d.endsWith("google.com") || d.endsWith("googleusercontent.com")) return;
-    if (seen.has(d)) return;
-    seen.add(d);
-    sources.push({ domain: d, url: target });
-    if (sources.length >= 10) return false;
+  // Sources: one per distinct link inside the block, in page order. Most are
+  // Google's redirect links; each one leads to the page that was cited.
+  const sources: SerpAiOverviewSource[] = [];
+  const byUrl = new Map<string, SerpAiOverviewSource>();
+  block.find("a[href]").each((_i, el) => {
+    const $a = $(el);
+    const link = resultLink($a.attr("href") ?? "");
+    if (!link) return;
+    if (!link.url_is_redirect) {
+      const d = domainOf(link.url);
+      if (!d || d.endsWith("google.com") || d.endsWith("googleusercontent.com")) return;
+    }
+    const label = ($a.attr("aria-label") ?? "").trim() || $a.text().replace(/\s+/g, " ").trim();
+    const known = byUrl.get(link.url);
+    if (known) {
+      if (!known.label) known.label = label;
+      return;
+    }
+    const source = { label, url: link.url, url_is_redirect: link.url_is_redirect };
+    byUrl.set(link.url, source);
+    sources.push(source);
   });
 
-  // Fallback: extract source domains from the text itself when there are no
-  // <a> tags inside the AIO container. Google often shows them as
-  // "Britannica +4" / "Wikipedia +4" inline name labels, with the real URL
-  // hidden inside an encrypted-tbn favicon attribute.
-  if (sources.length === 0) {
+  // The sites the overview cites, from the favicon URLs Google embeds in the
+  // block ("faviconV2?url=https://<site>"). The page does not say which link
+  // belongs to which site, so these are not paired with `sources`.
+  const source_domains: string[] = [];
+  {
     const html = clone.html() ?? "";
     const re = /url\\u003dhttps:\/\/(?:www\.)?([a-z0-9.-]+\.[a-z]{2,})/gi;
-    const seenFb = new Set<string>();
     let m: RegExpExecArray | null;
     while ((m = re.exec(html)) !== null) {
       const captured = m[1];
       if (!captured) continue;
       const d = captured.replace(/^www\./, "");
       if (d.endsWith("google.com") || d.endsWith("gstatic.com")) continue;
-      if (seenFb.has(d)) continue;
-      seenFb.add(d);
-      // Spec requires url; synthesise from the domain for fallback sources.
-      sources.push({ domain: d, url: `https://${d}` });
-      if (sources.length >= 8) break;
+      if (source_domains.includes(d)) continue;
+      source_domains.push(d);
+      if (source_domains.length >= 8) break;
     }
   }
 
   return {
     text: cleaned,
     sources,
+    source_domains,
   };
 }
 
@@ -185,10 +260,21 @@ function extractPaa($: CheerioAPI, searchQuery: string): SerpPaaItem[] {
     if (seen.has(trimmed.toLowerCase())) return;
     seen.add(trimmed.toLowerCase());
 
-    // Answer container: Google reuses the AIO `pOOWX` class for the
-    // expanded answer inside each PAA item.
+    // Answer container: Google now writes each answer as an "AI Mode" reply
+    // in `.mZJni` (the `.pOOWX` inside the item is left empty); older pages
+    // reused the AIO `pOOWX` class. Take the first one that holds text.
     const $el = $(el);
-    const answerBlock = $el.find(".pOOWX").first();
+    let answerBlock = $el.find(".mZJni").first();
+    for (const sel of [".mZJni", ".pOOWX"]) {
+      const found = $el
+        .find(sel)
+        .filter((_j, b) => $(b).text().trim().length > 0)
+        .first();
+      if (found.length) {
+        answerBlock = found;
+        break;
+      }
+    }
     let answer = "";
     if (answerBlock.length) {
       const clone = answerBlock.clone();
@@ -224,11 +310,10 @@ function extractOrganic(
   const out: SerpOrganicResult[] = [];
   $(".yuRUbf").each((i, el) => {
     const $el = $(el);
-    const a = $el.find("a[href]").first();
-    const href = a.attr("href") ?? "";
-    if (!href.startsWith("http")) return;
     const title = $el.find("h3").first().text().trim();
     if (!title) return;
+    const link = resultLink($el.find("a[href]").first().attr("href") ?? "");
+    const displayed = $el.find("cite").first().text().replace(/\s+/g, " ").trim();
     // Snippet usually lives in the parent or a sibling .VwiC3b
     const $parent = $el.parent();
     const snippetEl = $parent.find(".VwiC3b").first().length
@@ -238,11 +323,48 @@ function extractOrganic(
     out.push({
       position: i + 1,
       title,
-      url: href,
+      url: link?.url ?? null,
+      url_is_redirect: link?.url_is_redirect ?? false,
+      displayed_url: displayed,
+      domain: link && !link.url_is_redirect ? domainOf(link.url) || null : domainOfDisplayed(displayed),
       snippet,
     });
   });
   // Re-number positions after slicing so they remain 1-based and sequential
   // even when maxResults < collected count.
   return out.slice(0, maxResults).map((r, i) => ({ ...r, position: i + 1 }));
+}
+
+// A page with result headings but no result read means the page layout has
+// moved on, not that there are no results: say so instead of returning [].
+function organicWarnings($: CheerioAPI, organicCount: number): string[] {
+  if (organicCount > 0) return [];
+  // Result headings only: "People also ask" questions and AI answers have h3s too.
+  const headings = $("#rso h3").filter((_i, h) => $(h).closest(".related-question-pair, .pOOWX, .mZJni").length === 0).length;
+  if (headings === 0) return [];
+  return [
+    `The page shows ${headings} result heading(s), but none could be read: Google may have changed its page layout. Treat this as a parser problem, not as "no results".`,
+  ];
+}
+
+// Same idea for "People also ask": a question that carries a long text on the
+// page but came back without an answer means the answer moved, not that there
+// is none. (An unexpanded question carries only a few words of chrome.)
+const PAA_UNREAD_MIN_CHARS = 300;
+
+function paaWarnings($: CheerioAPI, items: SerpPaaItem[]): string[] {
+  const unanswered = new Set(items.filter((q) => !q.answer).map((q) => q.question));
+  let unread = 0;
+  $(".related-question-pair").each((_i, el) => {
+    const q = ($(el).attr("data-q") ?? "").trim();
+    if (!unanswered.has(q)) return;
+    const clone = $(el).clone();
+    clone.find("script, style, noscript, svg").remove();
+    const extra = clone.text().replace(/\s+/g, " ").trim().length - q.length;
+    if (extra >= PAA_UNREAD_MIN_CHARS) unread++;
+  });
+  if (unread === 0) return [];
+  return [
+    `${unread} "people also ask" answer(s) are on the page but could not be read: Google may have changed its page layout. Treat this as a parser problem, not as "no answer".`,
+  ];
 }
