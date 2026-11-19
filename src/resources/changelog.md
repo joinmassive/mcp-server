@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+- **`web_search` returns Google results again.** Google now writes each result link as `/goto?url=<token>`, which the parser did not read, so the result list came back empty. Each result now has its title, snippet, `displayed_url` (the address text Google shows), `domain`, and Google's link to the page in `url` (`url_is_redirect: true`), the same link the API returns; open it with `web_fetch`.
+- **AI overview sources** are listed one per cited link, with the name Google shows (`label`) and Google's link, so the cited page can be opened. The sites from the overview's favicons are in `source_domains`.
+- **"People also ask" answers** are read again: Google now writes them as AI Mode replies in a new container, and the answer field came back empty.
+- **`warnings`** in the answer when a page has results, or "People also ask" answers, that could not be read.
+- README: the example shows what `web_search` now returns.
+
 ## v0.2.2 (2026-06-11)
 
 ### Fixed

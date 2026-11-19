@@ -79,6 +79,7 @@ export function registerWebSearch(server: McpServer, client: MassiveClient): voi
       title: "Web search",
       description: [
         "Google search results parsed into structured JSON. Returns organic results, AI overview (if present), and 'people also ask' questions.",
+        "Each result's `url` is Google's own link to the page when `url_is_redirect` is true (the real address is not known yet): open it with web_fetch to read the page. `displayed_url` is the text Google prints under the title, not an address.",
         "",
         "Cost: 1 credit base. No multipliers.",
         "Use expiration=0 for always-live results; default expiration=1 (day) reuses cached SERPs.",
