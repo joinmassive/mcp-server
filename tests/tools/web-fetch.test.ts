@@ -83,10 +83,10 @@ describe("webFetchHandler", () => {
     );
     const client = new MassiveClient({ fetchImpl: fetchSpy });
 
-    await webFetchHandler({ url: "https://example.com", expiration: 7 }, client);
+    await webFetchHandler({ url: "https://example.com", expiration: 1 }, client);
 
     const [reqUrl] = fetchSpy.mock.calls[0];
-    expect(reqUrl).toMatch(/expiration=7/);
+    expect(reqUrl).toMatch(/expiration=1/);
   });
 
   it("forwards expiration=0 (live, no cache) without omitting it", async () => {
@@ -114,8 +114,9 @@ describe("webFetchHandler", () => {
   });
 
   it.each([
-    { val: -1, hint: "0–365" },
-    { val: 366, hint: "0–365" },
+    { val: -1, hint: "0 or 1" },
+    { val: 2, hint: "0 or 1" },
+    { val: 365, hint: "0 or 1" },
     { val: 1.5, hint: "integer" },
   ])("rejects invalid expiration $val", async ({ val, hint }) => {
     const fetchSpy = vi.fn();

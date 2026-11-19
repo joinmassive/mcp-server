@@ -85,10 +85,10 @@ describe("webSearchHandler", () => {
     );
     const client = new MassiveClient({ fetchImpl: fetchSpy });
 
-    await webSearchHandler({ query: "x", max_results: 10, expiration: 7 }, client);
+    await webSearchHandler({ query: "x", max_results: 10, expiration: 1 }, client);
 
     const [reqUrl] = fetchSpy.mock.calls[0];
-    expect(reqUrl).toMatch(/expiration=7/);
+    expect(reqUrl).toMatch(/expiration=1/);
   });
 
   it("forwards expiration=0 (live, no cache)", async () => {
@@ -115,14 +115,15 @@ describe("webSearchHandler", () => {
     expect(reqUrl).not.toMatch(/expiration=/);
   });
 
-  it("rejects expiration > 365", async () => {
+  it.each([2, 7, 365])("rejects expiration %i (the API accepts 0 or 1)", async (val) => {
     const fetchSpy = vi.fn();
     const client = new MassiveClient({ fetchImpl: fetchSpy });
     const result = await webSearchHandler(
-      { query: "x", max_results: 10, expiration: 999 } as never,
+      { query: "x", max_results: 10, expiration: val } as never,
       client,
     );
     expect(result.isError).toBe(true);
+    expect(result.content[0].text).toMatch(/0 or 1/);
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 

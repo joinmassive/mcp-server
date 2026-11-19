@@ -26,10 +26,10 @@ export const webFetchInput = {
   expiration: z
     .number()
     .int("expiration must be an integer (days)")
-    .min(0, "expiration must be 0–365 days")
-    .max(365, "expiration must be 0–365 days")
+    .min(0, "expiration must be 0 or 1 (days)")
+    .max(1, "expiration must be 0 or 1 (days)")
     .optional()
-    .describe("Days the cached result is reused (0 = always live; default 1)."),
+    .describe("Days the cached result is reused: 0 = always live, 1 = up to a day old (default 1)."),
   difficulty: z
     .enum(["low", "medium", "high"])
     .default("low")
